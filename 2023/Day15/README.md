@@ -9,6 +9,7 @@ You can find the task description and input on [the Advent of Code website](http
 We have a comma separated list of strings, which are starting with a couple of letters followed by a <code>-</code> or an <code>=</code>, then endig in a number between 0 and 9.
 
 We have been given a method called HASHMAP:
+
 0. start from 0
 1. add the character's ASCII value
 2. multiply it by 17
