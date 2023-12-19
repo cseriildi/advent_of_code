@@ -33,8 +33,11 @@ def east(pattern):
 def south(pattern):
     return [''.join(j) for j in zip(*east([''.join(i) for i in zip(*pattern)]))]
 
+def cycling(pattern):
+    return east(south(west(north(pattern)))) 
+
 def load(pattern):
-    return sum([line.count("O") * (len(pattern) - index) for index, line in enumerate(pattern)])
+    return sum([line.count("O") * index for index, line in enumerate(reversed(pattern), start = 1)])
 
 #####################
 ## PART 1 SOLUTION ##
@@ -45,8 +48,18 @@ print("Part 1 Solution: ", load(north(input)))
 #####################
 ## PART 2 SOLUTION ##
 #####################
-pattern = input
-for cycle in range(1000000000):
-    pattern = east(south(west(north(pattern))))
 
-print("Part 2 Solution: ", "in progress" )
+pattern_changes = [input]
+
+while len(pattern_changes) < 1000000000:
+    pattern = cycling(pattern_changes[-1])
+
+    if pattern in pattern_changes:
+        break
+    pattern_changes.append(pattern)
+
+sequence_start = pattern_changes.index(pattern) 
+sequence_end = len(pattern_changes) 
+sequence_length = sequence_end - sequence_start 
+
+print("Part 2 Solution: ", load(pattern_changes[(1000000000 - sequence_start) % sequence_length + sequence_start]))
