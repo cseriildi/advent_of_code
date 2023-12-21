@@ -17,7 +17,7 @@
 |[13](https://github.com/cseriildi/advent_of_code/tree/main/2023/Day13)|   ⭐  |   ⭐  |
 |[14](https://github.com/cseriildi/advent_of_code/tree/main/2023/Day14)|   ⭐  |   ⭐  |
 |[15](https://github.com/cseriildi/advent_of_code/tree/main/2023/Day15)|   ⭐  |   ⭐  |
-|16|       |       |
+|[16](https://github.com/cseriildi/advent_of_code/tree/main/2023/Day16)|   ⭐  |   ⭐  |
 |17|       |       |
 |18|       |       |
 |19|       |       |
