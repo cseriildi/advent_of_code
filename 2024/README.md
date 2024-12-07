@@ -8,7 +8,7 @@
 |[4](./Day04/Solution.py)|   ⭐  |   ⭐  |
 |[5](./Day05/Solution.py)|   ⭐  |   ⭐  |
 |[6](./Day06/Solution.py)|   ⭐  |   ⭐  |
-|7|       |       |
+|[7](./Day07/Solution.py)|   ⭐  |   ⭐  |
 |8|       |       |
 |9|       |       |
 |10|       |       |
