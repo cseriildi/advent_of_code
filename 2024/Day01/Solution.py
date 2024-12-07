@@ -2,8 +2,8 @@
 ## INPUT PARSING ##
 ###################
 
-def parse():
-	with open("input.txt", 'r') as infile:
+def parse(filename):
+	with open(filename, 'r') as infile:
 		return infile.read().splitlines()
 
 def split_columns(input):
@@ -36,8 +36,13 @@ def part2(input):
 
 	return sum(num * right.count(num) for num in left)
 
-
 if __name__ == "__main__":
-	input = parse()
+	from os import path
+	dirname = path.dirname(__file__)
+
+	input = parse(dirname + "/input.txt")
+	example = parse(dirname + "/example.txt")
+	print("Part 1 Example: ", part1(example))
 	print("Part 1 Solution: ", part1(input))
+	print("Part 2 Example: ", part2(example))
 	print("Part 2 Solution: ", part2(input))

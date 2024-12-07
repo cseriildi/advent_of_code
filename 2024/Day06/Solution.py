@@ -85,8 +85,11 @@ def part2(input):
 	return result
 
 if __name__ == "__main__":
-	input = parse("input.txt")
-	example = parse("example.txt")
+	from os import path
+	dirname = path.dirname(__file__)
+
+	input = parse(dirname + "/input.txt")
+	example = parse(dirname + "/example.txt")
 	print("Part 1 Example: ", part1(example))
 	print("Part 1 Solution: ", part1(input))
 	print("Part 2 Example: ", part2(example))

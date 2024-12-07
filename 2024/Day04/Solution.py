@@ -2,8 +2,8 @@
 ## INPUT PARSING ##
 ###################
 
-def parse():
-	with open("input.txt", 'r') as infile:
+def parse(filename):
+	with open(filename, 'r') as infile:
 		input = infile.read().split()
 		return input
 
@@ -69,6 +69,12 @@ def part2(input):
 	return sum(is_xmas(input, row, col) for row in range(1, max_x - 1) for col in range(1, max_y - 1))
 
 if __name__ == "__main__":
-	input = parse()
+	from os import path
+	dirname = path.dirname(__file__)
+
+	input = parse(dirname + "/input.txt")
+	example = parse(dirname + "/example.txt")
+	print("Part 1 Example: ", part1(example))
 	print("Part 1 Solution: ", part1(input))
+	print("Part 2 Example: ", part2(example))
 	print("Part 2 Solution: ", part2(input))

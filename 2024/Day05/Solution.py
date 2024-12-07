@@ -2,8 +2,8 @@
 ## INPUT PARSING ##
 ###################
 
-def parse():
-	with open("input.txt", 'r') as infile:
+def parse(filename):
+	with open(filename, 'r') as infile:
 		input = infile.read().split("\n\n")
 		rules = [[int(i) for i in row.split("|")] for row in input[0].splitlines()]
 		updates = [[int(i)for i in row.split(",")] for row in input[1].splitlines()]
@@ -15,10 +15,10 @@ def parse():
 
 def is_correct(rules, update):
 
-	return all(False for ind in range(len(update) - 1) if ([update[ind + 1], update[ind]] in rules))
+	return all([update[ind], update[ind + 1]] in rules for ind in range(len(update) - 1))
 
 def get_middle(arr):
-	return arr[int(len(arr)/ 2)]
+	return arr[len(arr) // 2]
 
 def part1(input):
 	rules, updates = input
@@ -48,6 +48,12 @@ def part2(input):
 	return sum(get_middle(fix_update(rules, update)) for update in updates if not is_correct(rules, update))
 
 if __name__ == "__main__":
-	input = parse()
+	from os import path
+	dirname = path.dirname(__file__)
+
+	input = parse(dirname + "/input.txt")
+	example = parse(dirname + "/example.txt")
+	print("Part 1 Example: ", part1(example))
 	print("Part 1 Solution: ", part1(input))
+	print("Part 2 Example: ", part2(example))
 	print("Part 2 Solution: ", part2(input))

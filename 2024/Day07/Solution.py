@@ -20,18 +20,24 @@ def mul(num1, num2):
 	return num1 * num2
 
 def combine(num1, num2):
-	return int(str(num1)  + str(num2))
+	return int(str(num1) + str(num2))
 
 def is_good(result, nums, to_combine=False):
 
-	results = {nums[0]}
-	for i in range(1, len(nums)):
+	results = {}
+	for num in nums:
+		if not results:
+			results = {num}
+			continue
 		curr = set()
-		for num in results:
-			curr.add(add(num, nums[i]))
-			curr.add(mul(num, nums[i]))
-			if to_combine:
-				curr.add(combine(num, nums[i]))
+		for prev_num in results:
+			if prev_num < result:
+				curr.add(add(prev_num, num))
+				curr.add(mul(prev_num, num))
+				if to_combine:
+					curr.add(combine(prev_num, num))
+		if not curr:
+			return False
 		results = curr
 
 	return result in results
@@ -51,8 +57,11 @@ def part2(input):
 	return sum(result for i, result in enumerate(results) if is_good(result, nums[i], True))
 
 if __name__ == "__main__":
-	input = parse("input.txt")
-	example = parse("example.txt")
+	from os import path
+	dirname = path.dirname(__file__)
+
+	input = parse(dirname + "/input.txt")
+	example = parse(dirname + "/example.txt")
 	print("Part 1 Example: ", part1(example))
 	print("Part 1 Solution: ", part1(input))
 	print("Part 2 Example: ", part2(example))
