@@ -22,7 +22,7 @@ def mul(num1, num2):
 def combine(num1, num2):
 	return int(str(num1) + str(num2))
 
-def is_good(result, nums, to_combine=False):
+def can_produce_result(result, nums, to_combine=False):
 
 	results = {}
 	for num in nums:
@@ -31,7 +31,7 @@ def is_good(result, nums, to_combine=False):
 			continue
 		curr = set()
 		for prev_num in results:
-			if prev_num < result:
+			if prev_num <= result:
 				curr.add(add(prev_num, num))
 				curr.add(mul(prev_num, num))
 				if to_combine:
@@ -45,7 +45,7 @@ def is_good(result, nums, to_combine=False):
 def part1(input):
 	results, nums = input
 		
-	return sum(result for i, result in enumerate(results) if is_good(result, nums[i]))
+	return sum(result for i, result in enumerate(results) if can_produce_result(result, nums[i]))
 
 #####################
 ## PART 2 SOLUTION ##
@@ -54,7 +54,7 @@ def part1(input):
 def part2(input):
 	results, nums = input
 		
-	return sum(result for i, result in enumerate(results) if is_good(result, nums[i], True))
+	return sum(result for i, result in enumerate(results) if can_produce_result(result, nums[i], True))
 
 if __name__ == "__main__":
 	from os import path
