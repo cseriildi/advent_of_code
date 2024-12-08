@@ -1,3 +1,5 @@
+from os import path
+import sys
 from itertools import combinations
 import math
 
@@ -7,7 +9,6 @@ import math
 
 class Data:
 	def __init__(self, filename):
-
 		with open(filename, 'r') as infile:
 			content = infile.read()
 
@@ -16,6 +17,19 @@ class Data:
 		self.cols = len(self.grid[0])
 		self.antenna_types = {char for char in content if char not in {'.', '\n'}}
 		self.part = 1
+		if filename == EXAMPLE_FILE_NAME:
+			self.type = "Example"
+		elif filename == INPUT_FILE_NAME:
+			self.type = "Solution"
+		else:
+			self.type = "undefined"
+		self.result = 0
+
+	def print_solution(self):
+		color = "\033[90m" if self.part == 1 else "\033[33m"
+		print(f"{color}Part {self.part} {self.type}: {self.result}\033[0m")
+		self.part += 1
+		self.result = 0
 
 #####################
 ## PART 1 SOLUTION ##
@@ -81,27 +95,39 @@ def part1(input):
 		antennas = find_matching_antennas(input, type)
 		antinodes |= find_antinodes(input, antennas)
 
-	return len(antinodes)
+	input.result = len(antinodes)
+	input.print_solution()
 
 #####################
 ## PART 2 SOLUTION ##
 #####################
 
 def part2(input):
+	part1(input)
 
-	return part1(input)
+##########
+## MAIN ##
+##########
+
+dirname = path.dirname(__file__)
+EXAMPLE_FILE_NAME = path.join(dirname, "example.txt")
+INPUT_FILE_NAME = path.join(dirname, "input.txt")
 
 if __name__ == "__main__":
-	from os import path
-	dirname = path.dirname(__file__)
 
-	example = Data(path.join(dirname, "example.txt"))
-	input = Data(path.join(dirname, "input.txt"))
+	try:
+		example = Data(EXAMPLE_FILE_NAME)
+	except:
+		example = False
+		print("\033[1;91mSave puzzle example to", EXAMPLE_FILE_NAME, "\033[0m", file=sys.stderr)
 
-	print("Part", example.part, "Example: ", part1(example))
-	print("Part", input.part, "Solution: ", part1(input))
-
-	example.part = 2
-	input.part = 2
-	print("Part", example.part, "Example: ", part2(example))
-	print("Part", input.part, "Solution: ", part2(input))
+	try:
+		input = Data(INPUT_FILE_NAME)
+	except:
+		print("\033[1;91mSave puzzle input to",  INPUT_FILE_NAME, "\033[0m", file=sys.stderr)
+		exit(1)
+	
+	if example: part1(example)
+	part1(input)
+	if example: part2(example)
+	part2(input)
