@@ -5,15 +5,17 @@ import math
 ## INPUT PARSING ##
 ###################
 
-def parse(filename):
-	with open(filename, 'r') as infile:
-		input = infile.read()
-		grid = [list(row) for row in input.splitlines()]
-		antenna_types = {char for char in input if char not in ('.', '\n')}
-		rows = len(grid)
-		cols = len(grid[0])
+class Data:
+	def __init__(self, filename):
 
-		return {"grid" : grid, "grid_size" : (rows, cols), "antenna_types": antenna_types}
+		with open(filename, 'r') as infile:
+			content = infile.read()
+
+		self.grid = [list(row) for row in content.splitlines()]
+		self.rows = len(self.grid)
+		self.cols = len(self.grid[0])
+		self.antenna_types = {char for char in content if char not in {'.', '\n'}}
+		self.part = 1
 
 #####################
 ## PART 1 SOLUTION ##
@@ -36,22 +38,22 @@ def	is_on_grid(p, rows, cols):
 def next_point(p, dx, dy):
 	return (p[0] + dx, p[1] + dy)
 
-def find_antinodes(input, antennas, part2 = False):
+def find_antinodes(input, antennas):
 
-	(rows, cols) = input["grid_size"]
+	rows, cols = input.rows, input.cols
 	antinodes = set()
 
 	for a1, a2 in combinations(antennas, 2):
 
-		dx, dy = get_distance(a1, a2, part2)
+		dx, dy = get_distance(a1, a2, input.part)
 
-		if not part2:
+		if input.part == 1:
 			if is_on_grid(next_point(a1, dx, dy), rows, cols):
 				antinodes.add(next_point(a1, dx, dy))
 			if is_on_grid(next_point(a2, -dx, -dy), rows, cols):
 				antinodes.add(next_point(a2, -dx, -dy))
 
-		if part2:
+		if input.part == 2:
 			antinodes.add(a1)
 			while is_on_grid(next_point(a1, dx, dy), rows, cols):
 				a1 = next_point(a1, dx, dy)
@@ -65,8 +67,8 @@ def find_antinodes(input, antennas, part2 = False):
 
 def find_matching_antennas(input, type):
 
-	(rows, cols) = input["grid_size"]
-	grid = input["grid"]
+	rows, cols = input.rows, input.cols
+	grid = input.grid
 
 	return {(row, col) for row in range(rows) for col in range(cols) if grid[row][col] == type}
 
@@ -74,7 +76,7 @@ def part1(input):
 
 	antinodes = set()
 
-	for type in input["antenna_types"]:
+	for type in input.antenna_types:
 
 		antennas = find_matching_antennas(input, type)
 		antinodes |= find_antinodes(input, antennas)
@@ -87,22 +89,19 @@ def part1(input):
 
 def part2(input):
 
-	antinodes = set()
-
-	for type in input["antenna_types"]:
-
-		antennas = find_matching_antennas(input, type)
-		antinodes |= find_antinodes(input, antennas, True)
-
-	return len(antinodes)
+	return part1(input)
 
 if __name__ == "__main__":
 	from os import path
 	dirname = path.dirname(__file__)
 
-	input = parse(dirname + "/input.txt")
-	example = parse(dirname + "/example.txt")
-	print("Part 1 Example: ", part1(example))
-	print("Part 1 Solution: ", part1(input))
-	print("Part 2 Example: ", part2(example))
-	print("Part 2 Solution: ", part2(input))
+	example = Data(path.join(dirname, "example.txt"))
+	input = Data(path.join(dirname, "input.txt"))
+
+	print("Part", example.part, "Example: ", part1(example))
+	print("Part", input.part, "Solution: ", part1(input))
+
+	example.part = 2
+	input.part = 2
+	print("Part", example.part, "Example: ", part2(example))
+	print("Part", input.part, "Solution: ", part2(input))
