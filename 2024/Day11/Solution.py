@@ -1,9 +1,7 @@
 from os import path
 import sys
-import pprint as pp
 import math
-from collections import defaultdict
-from functools import lru_cache
+from functools import cache
 
 ###################
 ## INPUT PARSING ##
@@ -35,10 +33,11 @@ class Data:
 ## PART 1 SOLUTION ##
 #####################
 
-@lru_cache(maxsize=None)
+@cache
 def len_of_int(stone):
-    return int(math.log10(stone)) + 1 if stone > 0 else 1
+	return int(math.log10(stone)) + 1 if stone > 0 else 1
 
+@cache
 def split_num_in_half(num, stone_len):
 
 	divisor = 10 ** (stone_len // 2)
@@ -46,8 +45,9 @@ def split_num_in_half(num, stone_len):
 	right = num % divisor
 	return [left, right]
 
-@lru_cache(maxsize=None)
+@cache
 def get_new_stones(stone):
+	
 	stone_len = len_of_int(stone)
 	if stone == 0:
 		return [1]
@@ -56,15 +56,22 @@ def get_new_stones(stone):
 	else:
 		return [stone * 2024]
 
-def blink(st, times):
-	stones = [st]
-	for _ in range(times):
-		stones = [num for stone in stones for num in get_new_stones(stone)]
-	
-	return len(stones)
+@cache
+def blink(stone, level):
+	count = 1
+	while level > 0:
+		level -= 1
+		stone_len = len_of_int(stone)
+		if stone == 0:
+			stone = 1
+		elif stone_len % 2 == 0:
+			stone, right = split_num_in_half(stone, stone_len)
+			count += blink(right, level)
+		else:
+			stone *= 2024
+	return count
 
 def part1(input):
-	
 	input.result = sum(blink(stone, 25) for stone in input.stones)
 	input.print_solution()
 
@@ -73,7 +80,6 @@ def part1(input):
 #####################
 
 def part2(input):
-
 	input.result = sum(blink(stone, 75) for stone in input.stones)
 	input.print_solution()
 
@@ -101,5 +107,5 @@ if __name__ == "__main__":
 	
 	if example: part1(example)
 	part1(input)
-	#if example: part2(example)
+	if example: part2(example)
 	part2(input)

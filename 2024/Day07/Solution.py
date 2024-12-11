@@ -61,8 +61,9 @@ if __name__ == "__main__":
 	dirname = path.dirname(__file__)
 
 	input = parse(dirname + "/input.txt")
-	example = parse(dirname + "/example.txt")
-	print("Part 1 Example: ", part1(example))
+	#example = parse(dirname + "/example.txt")
+	
+#print("Part 1 Example: ", part1(example))
 	print("Part 1 Solution: ", part1(input))
-	print("Part 2 Example: ", part2(example))
+#	print("Part 2 Example: ", part2(example))
 	print("Part 2 Solution: ", part2(input))

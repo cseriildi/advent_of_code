@@ -12,7 +12,7 @@
 |[8](./Day08/Solution.py)|   ⭐   |   ⭐   |
 |[9](./Day09/Solution.py)|   ⭐   |   ⭐   |
 |[10](./Day10/Solution.py)|   ⭐   |   ⭐   |
-|11|       |       |
+|[11](./Day11/Solution.py)|   ⭐   |   ⭐   |
 |12|       |       |
 |13|       |       |
 |14|       |       |
