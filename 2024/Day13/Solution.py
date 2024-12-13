@@ -32,12 +32,12 @@ class Data:
 #####################
 
 def solve_equation_system(machine):
-	x1, y1, x2, y2, price1, price2 = machine
+	x1, y1, x2, y2, prize1, prize2 = machine
 
 	a, b = symbols('a b')
 
-	equation1 = Eq(x1 * a + y1 * b, price1)
-	equation2 = Eq(x2 * a + y2 * b, price2)
+	equation1 = Eq(x1 * a + y1 * b, prize1)
+	equation2 = Eq(x2 * a + y2 * b, prize2)
 
 	solution = solve((equation1, equation2), (a, b))
 	if isinstance(solution[a], Integer) and isinstance(solution[b], Integer):
@@ -45,25 +45,15 @@ def solve_equation_system(machine):
 	return 0, 0
 
 def parse_machine(machine, input):
-	x, y, price = machine.split("\n")
-	x1, x2 = x.split(",")
-	y1, y2 = y.split(",")
-	x1 = int(''.join(re.findall(r'\d', x1)))
-	y1 = int(''.join(re.findall(r'\d', y1)))
-	x2 = int(''.join(re.findall(r'\d', x2)))
-	y2 = int(''.join(re.findall(r'\d', y2)))
-	price1, price2 = price.split(",")
-	price1 = int(''.join(re.findall(r'\d', price1)))
-	price2 = int(''.join(re.findall(r'\d', price2)))
+	x1, x2, y1, y2, prize1, prize2 = map(int, re.findall(r'\d+', machine))
 
 	if input.part == 2:
-		price1 += 10000000000000
-		price2 += 10000000000000
+		prize1 += PRIZE_INCREMENT
+		prize2 += PRIZE_INCREMENT
 
-	return x1, y1, x2, y2, price1, price2
+	return x1, y1, x2, y2, prize1, prize2
 
 def part1(input):
-
 	for machine in input.machines:
 		a, b = solve_equation_system(parse_machine(machine, input))
 		input.result += a * 3 + b
@@ -74,13 +64,10 @@ def part1(input):
 ## PART 2 SOLUTION ##
 #####################
 
-def part2(input):
-	input.part = 2
-	for machine in input.machines:
-		a, b = solve_equation_system(parse_machine(machine, input))
-		input.result += a * 3 + b
+PRIZE_INCREMENT = 10000000000000
 
-	input.print_solution()	
+def part2(input):
+	part1(input)
 
 ##########
 ## MAIN ##
