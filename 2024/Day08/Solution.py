@@ -1,7 +1,6 @@
 from os import path
 import sys
 from itertools import combinations
-import math
 
 ###################
 ## INPUT PARSING ##
@@ -35,14 +34,9 @@ class Data:
 ## PART 1 SOLUTION ##
 #####################
 
-def get_distance(p1, p2, normalize):
+def get_distance(p1, p2):
 	dx = p1[0] - p2[0]
 	dy = p1[1] - p2[1]
-
-	if normalize:
-		greatest_common_divisor = math.gcd(abs(dx), abs(dy))
-		dx //= greatest_common_divisor
-		dy //= greatest_common_divisor
 
 	return dx, dy
 
@@ -59,7 +53,7 @@ def find_antinodes(input, antennas):
 
 	for a1, a2 in combinations(antennas, 2):
 
-		dx, dy = get_distance(a1, a2, input.part)
+		dx, dy = get_distance(a1, a2)
 
 		if input.part == 1:
 			if is_on_grid(next_point(a1, dx, dy), rows, cols):
@@ -69,13 +63,15 @@ def find_antinodes(input, antennas):
 
 		if input.part == 2:
 			antinodes.add(a1)
+			antinodes.add(a2)
+
 			while is_on_grid(next_point(a1, dx, dy), rows, cols):
 				a1 = next_point(a1, dx, dy)
 				antinodes.add(a1)
-
-			while is_on_grid(next_point(a1, -dx, -dy), rows, cols):
-				a1 = next_point(a1, -dx, -dy)
-				antinodes.add(a1)
+			antinodes.add(a2)
+			while is_on_grid(next_point(a2, -dx, -dy), rows, cols):
+				a2 = next_point(a2, -dx, -dy)
+				antinodes.add(a2)
 
 	return antinodes
 
