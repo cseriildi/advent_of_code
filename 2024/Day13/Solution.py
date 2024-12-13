@@ -1,7 +1,8 @@
 from os import path
 import sys
-import numpy as np
 import re
+from sympy import symbols, Eq, solve, Integer
+
 
 ###################
 ## INPUT PARSING ##
@@ -31,55 +32,45 @@ class Data:
 ## PART 1 SOLUTION ##
 #####################
 
-def find_combo(ax, ay, bx, by, pricex, pricey, input):
+def solve_equation_system(machine):
+	x1, y1, x2, y2, price1, price2 = machine
 
-	if input.part == 1:
-		a = [i for i in range(100)]
-		#min(101, pricex // ax, pricey // ay))]
-		b = [i for i in range(100)]
-		#min(101, pricex // bx, pricey // by))]
-	else:
-		a = [i for i in range(min(pricex // ax, pricey // ay), 0, -1)]
-		b = [i for i in range(min(101, pricex // bx, pricey // by), 0, -1)]
+	a, b = symbols('a b')
 
-	needed_a = -1
-	needed_b = -1
+	equation1 = Eq(x1 * a + y1 * b, price1)
+	equation2 = Eq(x2 * a + y2 * b, price2)
 
+	solution = solve((equation1, equation2), (a, b))
+	if isinstance(solution[a], Integer) and isinstance(solution[b], Integer):
+		return solution[a], solution[b]
+	return 0, 0
 
-	for i in a:
-		for j in b:
-			if i * ax + j * bx == pricex and i * ay + j * by == pricey:
-				needed_a = i
-				needed_b = j
-				break
-	return needed_a, needed_b,
+def parse_machine(machine, input):
+	x, y, price = machine.split("\n")
+	x1, x2 = x.split(",")
+	y1, y2 = y.split(",")
+	x1 = int(''.join(re.findall(r'\d', x1)))
+	y1 = int(''.join(re.findall(r'\d', y1)))
+	x2 = int(''.join(re.findall(r'\d', x2)))
+	y2 = int(''.join(re.findall(r'\d', y2)))
+	price1, price2 = price.split(",")
+	price1 = int(''.join(re.findall(r'\d', price1)))
+	price2 = int(''.join(re.findall(r'\d', price2)))
 
+	if input.part == 2:
+		price1 += 10000000000000
+		price2 += 10000000000000
 
-def parse_machine(machine):
-	a, b, price = machine.split("\n")
-	ax, ay = a.split(",")
-	ax = int(''.join(re.findall(r'\d', ax)))
-	ay = int(''.join(re.findall(r'\d', ay)))
-	bx, by = b.split(",")
-	bx = int(''.join(re.findall(r'\d', bx)))
-	by = int(''.join(re.findall(r'\d', by)))
-	pricex, pricey = price.split(",")
-	pricex = int(''.join(re.findall(r'\d', pricex)))
-	pricey = int(''.join(re.findall(r'\d', pricey)))
-
-	return ax, ay, bx, by, pricex, pricey
+	return x1, y1, x2, y2, price1, price2
 
 
 def part1(input):
 
 	for machine in input.machines:
-		ax, ay, bx, by, pricex, pricey = parse_machine(machine)
-
-		a, b = find_combo(ax, ay, bx, by, pricex, pricey, input)
-		if a != -1 and b != -1:
-			input.result += a * 3 + b
+		a, b = solve_equation_system(parse_machine(machine, input))
 		
-	
+		input.result += a * 3 + b
+		
 	input.print_solution()
 
 #####################
@@ -87,17 +78,11 @@ def part1(input):
 #####################
 
 def part2(input):
-
+	input.part = 2
 	for machine in input.machines:
-		ax, ay, bx, by, pricex, pricey = parse_machine(machine)
+		a, b = solve_equation_system(parse_machine(machine, input))
+		input.result += a * 3 + b
 
-		pricex += 10000000000000
-		pricey += 10000000000000
-		a, b = find_combo(ax, ay, bx, by, pricex, pricey, input)
-		if a != -1 and b != -1:
-			input.result += a * 3 + b
-		
-	
 	input.print_solution()	
 
 ##########
