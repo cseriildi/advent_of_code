@@ -3,7 +3,6 @@ import sys
 import re
 from sympy import symbols, Eq, solve, Integer
 
-
 ###################
 ## INPUT PARSING ##
 ###################
@@ -63,12 +62,10 @@ def parse_machine(machine, input):
 
 	return x1, y1, x2, y2, price1, price2
 
-
 def part1(input):
 
 	for machine in input.machines:
 		a, b = solve_equation_system(parse_machine(machine, input))
-		
 		input.result += a * 3 + b
 		
 	input.print_solution()
