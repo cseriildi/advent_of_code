@@ -15,7 +15,7 @@
 |[11](./Day11/Solution.py)|   ⭐   |   ⭐   |
 |[12](./Day12/Solution.py)|   ⭐   |   ⭐   |
 |[13](./Day13/Solution.py)|   ⭐   |   ⭐   |
-|14|       |       |
+|[14](./Day14/Solution.py)|   ⭐   |   ⭐   |
 |15|       |       |
 |16|       |       |
 |17|       |       |
