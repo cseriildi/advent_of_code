@@ -169,7 +169,7 @@ EXAMPLE_FILE_NAME = path.join(dirname, "example.txt")
 INPUT_FILE_NAME = path.join(dirname, "input.txt")
 
 VISUALIZATION = True
-VISUALIZE_ABOVE = 6500
+VISUALIZE_ABOVE = 6300
 
 if __name__ == "__main__":
 
