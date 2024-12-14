@@ -14,14 +14,11 @@ class Cell:
 	def __init__(self, x, y):
 		self.x = x
 		self.y = y
+		self.reset()
+
+	def reset(self):
 		self.char = '  '
 		self.color = '\033[0m'
-
-	def update_color(self):
-		
-		if self.char != '  ':
-			self.color = "\033[0m"
-			self.char = '  '
 			
 class Robot:
 	def __init__(self, px, py, vx, vy):
@@ -40,7 +37,6 @@ class Data:
 	def __init__(self, filename):
 
 		self.filename = filename
-		self.robots = []
 		self.part = 1
 		if filename == EXAMPLE_FILE_NAME:
 			self.type = "Example"
@@ -58,13 +54,14 @@ class Data:
 		self.nb_of_robots = len(self.robots)
 		self.grid = [[Cell(x, y) for x in range(self.size[0])] for y in range(self.size[1])]
 
+	def __str__(self):
+		return '\n'.join(''.join(cell.color + cell.char for cell in row) for row in self.grid)
+	
 	def parse_data(self):
 		with open(self.filename, 'r') as infile:
 			content = infile.read()
-		self.robots = [
-			Robot(values[0], values[1], values[2], values[3])
-			for line in content.splitlines()
-			for values in [list(map(int, re.findall(r'[+-]?\d+', line)))]]
+	
+		self.robots = [Robot(*map(int, re.findall(r'[+-]?\d+', line))) for line in content.splitlines()]
 		self.printed = False
 
 	def print_solution(self):
@@ -74,28 +71,27 @@ class Data:
 		self.result = 0
 	
 	def update_grid(self):
-
 		if VISUALIZATION:
 			for row in self.grid:
 				for cell in row:
-					cell.update_color()
+					if cell.x != self.quadrant[0] and cell.y != self.quadrant[1]:
+						cell.reset()
 
 		for robot in self.robots:
 			robot.move(self.size)
 
-			if VISUALIZATION:
+			if VISUALIZATION and robot.px != self.quadrant[0] and robot.py != self.quadrant[1]:
 				self.grid[robot.py][robot.px].char = robot.char
 				self.grid[robot.py][robot.px].color = robot.color
 
-				#if self.part == 1:
-				for i in range(self.size[0]):
-					self.grid[self.quadrant[1]][i].char = '██'
-					self.grid[self.quadrant[1]][i].color = '\033[33m'
-				
-				for row in self.grid:
-					row[self.quadrant[0]].char = '██'
-					row[self.quadrant[0]].color = '\033[33m'
-
+	def set_quadrant_lines(self):
+		for i in range(self.size[0]):
+			self.grid[self.quadrant[1]][i].char = '██'
+			self.grid[self.quadrant[1]][i].color = '\033[90m'
+			
+		for row in self.grid:
+			row[self.quadrant[0]].char = '██'
+			row[self.quadrant[0]].color = '\033[90m'
 
 	def print_grid(self):
 		if self.printed:
@@ -103,11 +99,9 @@ class Data:
 				print("\033[A", end="\033[0m")
 		else:
 			self.printed = True
+			self.set_quadrant_lines()
 
-		for row in self.grid:
-			print(''.join([cell.color + cell.char for cell in row]))
-
-		#sleep(0.1)
+		print(self)
 
 #####################
 ## PART 1 SOLUTION ##
@@ -148,30 +142,12 @@ def part1(input):
 #####################
 
 def is_cristmas_tree(input):
-
-
-	q1, q2, q3, q4 = count_robots(input)
-
-	max_q = max(q1, q2, q3, q4)
-
-	return max_q > input.nb_of_robots * 0.5
-
-	""" grid = [['.' for _ in range(input.size[0])] for _ in range(input.size[1])]
-	for robot in input.robots:
-		grid[robot.py][robot.px] = '#'
-	
-	for row in grid:
-		row = ''.join(row)
-		if row.find('########') != -1:
-			return True
-	return False """
-
+	return max(count_robots(input)) > input.nb_of_robots * 0.5
 
 def part2(input):
 
 	input.parse_data()
 	input.part = 2
-
 	input.update_grid()
 	input.result += 1
 
@@ -193,8 +169,7 @@ EXAMPLE_FILE_NAME = path.join(dirname, "example.txt")
 INPUT_FILE_NAME = path.join(dirname, "input.txt")
 
 VISUALIZATION = True
-
-VISUALIZE_ABOVE = 7300
+VISUALIZE_ABOVE = 6500
 
 if __name__ == "__main__":
 
@@ -212,5 +187,5 @@ if __name__ == "__main__":
 	
 	if example: part1(example)
 	part1(input)
-	#if example: part2(example)
+	if example: part2(example)
 	part2(input)
