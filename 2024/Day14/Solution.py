@@ -1,24 +1,15 @@
 from os import path
 import sys
 import re
-from time import sleep
-import random
+import numpy as np
+
+ROBOT = '🤖'
+VISUALIZATION = False
+VISUALIZE_ABOVE = 6300
 
 ###################
 ## INPUT PARSING ##
 ###################
-
-COLORS = ['\033[31;1m', '\033[32;1m', '\033[33;1m', '\033[34;1m', '\033[35;1m', '\033[36;1m', '\033[37;1m']
-
-class Cell:
-	def __init__(self, x, y):
-		self.x = x
-		self.y = y
-		self.reset()
-
-	def reset(self):
-		self.char = '  '
-		self.color = '\033[0m'
 			
 class Robot:
 	def __init__(self, px, py, vx, vy):
@@ -26,8 +17,6 @@ class Robot:
 		self.py = py
 		self.vx = vx
 		self.vy = vy
-		self.color = random.choice(COLORS)
-		self.char = '██'
 
 	def move(self, size):
 		self.px = (self.px + self.vx) % size[0]
@@ -52,11 +41,11 @@ class Data:
 		self.result = 0
 		self.parse_data()
 		self.nb_of_robots = len(self.robots)
-		self.grid = [[Cell(x, y) for x in range(self.size[0])] for y in range(self.size[1])]
+		self.grid = [["  " for _ in range(self.size[0])] for _ in range(self.size[1])]
 
 	def __str__(self):
-		return '\n'.join(''.join(cell.color + cell.char for cell in row) for row in self.grid)
-	
+		return '\n'.join(''.join(row) for row in self.grid)
+
 	def parse_data(self):
 		with open(self.filename, 'r') as infile:
 			content = infile.read()
@@ -71,27 +60,12 @@ class Data:
 		self.result = 0
 	
 	def update_grid(self):
-		if VISUALIZATION:
-			for row in self.grid:
-				for cell in row:
-					if cell.x != self.quadrant[0] and cell.y != self.quadrant[1]:
-						cell.reset()
+		for robot in self.robots:
+			self.grid[robot.py][robot.px] = "  "
 
 		for robot in self.robots:
 			robot.move(self.size)
-
-			if VISUALIZATION and robot.px != self.quadrant[0] and robot.py != self.quadrant[1]:
-				self.grid[robot.py][robot.px].char = robot.char
-				self.grid[robot.py][robot.px].color = robot.color
-
-	def set_quadrant_lines(self):
-		for i in range(self.size[0]):
-			self.grid[self.quadrant[1]][i].char = '██'
-			self.grid[self.quadrant[1]][i].color = '\033[90m'
-			
-		for row in self.grid:
-			row[self.quadrant[0]].char = '██'
-			row[self.quadrant[0]].color = '\033[90m'
+			self.grid[robot.py][robot.px] = ROBOT
 
 	def print_grid(self):
 		if self.printed:
@@ -99,8 +73,6 @@ class Data:
 				print("\033[A", end="\033[0m")
 		else:
 			self.printed = True
-			self.set_quadrant_lines()
-
 		print(self)
 
 #####################
@@ -112,25 +84,24 @@ def count_robots(input):
 	q1, q2, q3, q4 = 0, 0, 0, 0
 
 	for robot in input.robots:
+		if robot.px == input.quadrant[0] or robot.py == input.quadrant[1]:
+			continue
 		if robot.px < input.quadrant[0] and robot.py < input.quadrant[1]:
 			q1 += 1
 		elif robot.px > input.quadrant[0] and robot.py < input.quadrant[1]:
 			q2 += 1
 		elif robot.px < input.quadrant[0] and robot.py > input.quadrant[1]:
 			q3 += 1
-		elif robot.px > input.quadrant[0] and robot.py > input.quadrant[1]:
+		else:
 			q4 += 1
 
 	return q1, q2, q3, q4
-
 
 def part1(input):
 	
 	for _ in range(100):
 		input.update_grid()
-
-		if VISUALIZATION:
-			input.print_grid()
+		if VISUALIZATION: input.print_grid()
 
 	q1, q2, q3, q4 = count_robots(input)
 
@@ -141,17 +112,26 @@ def part1(input):
 ## PART 2 SOLUTION ##
 #####################
 
-def is_cristmas_tree(input):
-	return max(count_robots(input)) > input.nb_of_robots * 0.5
+def variance_of_robots(input):
+	
+	robots = np.array([[robot.px, robot.py] for robot in input.robots])
+	return np.var(robots, axis=0)
+
+def is_cristmas_tree(input, benchmark):
+
+	bx, by = benchmark
+	x_var, y_var = variance_of_robots(input)
+	return x_var < bx and y_var < by
 
 def part2(input):
 
 	input.parse_data()
 	input.part = 2
 	input.update_grid()
-	input.result += 1
+	input.result = 1
+	benchmark = variance_of_robots(input) * 0.75
 
-	while is_cristmas_tree(input) == False:
+	while is_cristmas_tree(input, benchmark) == False:
 		input.result += 1
 		input.update_grid()
 		
@@ -168,24 +148,24 @@ dirname = path.dirname(__file__)
 EXAMPLE_FILE_NAME = path.join(dirname, "example.txt")
 INPUT_FILE_NAME = path.join(dirname, "input.txt")
 
-VISUALIZATION = True
-VISUALIZE_ABOVE = 6300
-
 if __name__ == "__main__":
 
 	try:
 		example = Data(EXAMPLE_FILE_NAME)
-	except:
+	except FileNotFoundError:
 		example = False
 		print("\033[1;91mSave puzzle example to", EXAMPLE_FILE_NAME, "\033[0m", file=sys.stderr)
 
 	try:
 		input = Data(INPUT_FILE_NAME)
-	except:
+	except FileNotFoundError:
 		print("\033[1;91mSave puzzle input to",  INPUT_FILE_NAME, "\033[0m", file=sys.stderr)
 		exit(1)
 	
 	if example: part1(example)
 	part1(input)
-	if example: part2(example)
+	#if example: part2(example)
 	part2(input)
+
+
+
