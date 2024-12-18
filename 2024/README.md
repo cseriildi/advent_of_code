@@ -19,7 +19,7 @@
 |[15](./Day15/Solution.py)|   ⭐   |   ⭐   |
 |[16](./Day16/Solution.py)|   ⭐   |        |
 |[17](./Day17/Solution.py)|   ⭐   |   ⭐   |
-|18|       |       |
+|[18](./Day18/Solution.py)|   ⭐   |   ⭐   |
 |19|       |       |
 |20|       |       |
 |21|       |       |
