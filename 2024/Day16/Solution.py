@@ -92,14 +92,6 @@ def get_min_price(input):
 				new_price += 1000
 
 			heappush(to_check, (new_price, new_point, direction, path.copy()))
-	
-	""" 	for i in range(input.rows):
-		for j in range(input.cols):
-			if (i, j) in ulimate_path:
-				print("O", end="")
-			else:
-				print(input.grid[i][j], end="")
-		print() """
 
 	return min_price
 
@@ -113,17 +105,11 @@ def part1(input):
 
 def get_min_path(input):
 
-	path_counter = 0
-	to_check = [(0, input.start, [], RIGHT)]
-	min_price = get_min_price(input)
-	point = input.start
-	while to_check:
-
-		price, point, path, last_direction = heappop(to_check)
-		path.append(point)
-		for direction in DIRECTIONS:
+	def get_neighbours(point, path, last_direction, price):
+		neighbours = []
+		for direction in NEXT[last_direction]:
 			new_point = move(point, direction)
-			if not on_board(input, new_point) or input.grid[new_point[0]][new_point[1]] in "#x":
+			if not on_board(input, new_point) or input.grid[new_point[0]][new_point[1]] == "#":
 				continue
 			if new_point in path:
 				continue
@@ -132,25 +118,49 @@ def get_min_path(input):
 				new_price += 1000
 			if new_price > min_price:
 				continue
+			neighbours.append((new_point, direction, new_price))
+		return neighbours
+
+	to_check = [(0, input.start, [], RIGHT)]
+	min_price = get_min_price(input)
+	point = input.start
+	min_points = set()
+	while to_check:
+
+		price, point, path, last_direction = heappop(to_check)
+		path.append(point)
+		directions = get_neighbours(point, path, last_direction, price)
+		while len(directions) == 1:
+			new_point, direction, new_price = directions[0]
+			if new_point == input.end:
+				break
+			path.append(new_point)
+			directions = get_neighbours(new_point, path, direction, new_price)
+		
+		for new_point, direction, new_price in directions:
+			
 			if new_point == input.end:
 				if new_price == min_price:
 					path.append(new_point)
-					for x, y in path:
-						input.grid[x][y] = "O"
-					path_counter += 1
-					print("Path found", path_counter)
+					min_points |= set(path)
 				continue
+				
 			heappush(to_check, (new_price, new_point, path.copy(), direction))
+	return min_points
 
 def part2(input):
 
-	get_min_path(input)
+	paths = get_min_path(input)
 
-	for row in input.grid:
-		for cell in row:
-			if cell == "O":
-				input.result += 1
+	for i, row in enumerate(input.grid):
+		for j, cell in enumerate(row):
+			if (i, j) in paths:
+				print("O", end="")
+			else:
+				print(cell, end="")
+		print()
 
+	input.result = len(paths)
 	input.print_solution()
 
 ##########
