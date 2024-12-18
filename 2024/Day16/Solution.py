@@ -61,25 +61,21 @@ def move(point, dir):
 	return (point[0] + dir[0], point[1] + dir[1])
 
 def get_min_price(input):
-	to_check = [(0, input.start, RIGHT, [])]
+	to_check = [(0, input.start, RIGHT)]
 	visited = set()
-	min_price = 10000000
-	ulimate_path = []
+	min_price = input.rows * input.cols * 1000
 
 	while to_check:
-		price, point, last_direction, path = heappop(to_check)
+		price, point, last_direction = heappop(to_check)
 
 		state = (point, last_direction)
 		if state in visited:
 			continue
 		visited.add(state)
-		path.append(point)
 
 		if point == input.end:
 			if price < min_price:
 				min_price = price
-			if price == min_price:
-				ulimate_path = path.copy()
 			continue
 
 		for direction in NEXT[last_direction]:
@@ -91,7 +87,7 @@ def get_min_price(input):
 			if last_direction != direction:
 				new_price += 1000
 
-			heappush(to_check, (new_price, new_point, direction, path.copy()))
+			heappush(to_check, (new_price, new_point, direction))
 
 	return min_price
 
@@ -103,46 +99,102 @@ def part1(input):
 ## PART 2 SOLUTION ##
 #####################
 
+def remove_dead_ends(input):
+
+	def is_dead_end(point):
+		if input.grid[point] != ".":
+			return False, ()
+		
+		neighbors_coords = [move(point, direction) for direction in DIRECTIONS]
+		neighbors = [input.grid[coord] for coord in neighbors_coords]
+		if neighbors.count(".") == 0:
+			return True, ()
+		elif neighbors.count(".") == 1 and "S" not in neighbors and "E" not in neighbors:
+			return True, neighbors_coords[neighbors.index(".")]
+		return False, ()
+
+	def find_special_dots():
+		special_dots = set()
+
+		for i in range(1, input.rows - 1):
+			for j in range(1, input.cols - 1):
+				point = (i, j)
+				dead_end, neighbor = is_dead_end(point)
+				if dead_end:
+					special_dots.add((point, neighbor))
+				
+
+		return special_dots
+	
+	to_check = find_special_dots()
+
+	while to_check:
+		point, neighbor = to_check.pop()
+		input.grid[point] = "x"
+		if neighbor:
+			dead, new = is_dead_end(neighbor)
+			if dead:
+				to_check.add((neighbor, new))
+
+def get_vector(point1, point2):
+	return (point2[0] - point1[0], point2[1] - point1[1])
+
+def get_min_additional_price(input, point, direction):
+
+	addition = 0
+	v = get_vector(point, input.end)
+	addition += abs(v[0]) + abs(v[1])
+	if addition == 0:
+		return 0
+	if direction == UP and v[1] != 0:
+		addition += 1000
+	elif direction in (DOWN, LEFT):
+		addition += 2000
+	elif direction == RIGHT and v[0] != 0:
+		addition += 1000
+	return addition
+
 def get_min_path(input):
 
 	def get_neighbours(point, path, last_direction, price):
 		neighbours = []
 		for direction in NEXT[last_direction]:
 			new_point = move(point, direction)
-			if not on_board(input, new_point) or input.grid[new_point[0]][new_point[1]] == "#":
+			if not on_board(input, new_point) or input.grid[new_point[0]][new_point[1]] in "#x":
 				continue
 			if new_point in path:
 				continue
 			new_price = price + 1
 			if last_direction != direction:
 				new_price += 1000
-			if new_price > min_price:
+			if new_price + get_min_additional_price(input, new_point, direction) > min_price:
+			#if new_price > min_price:
 				continue
 			neighbours.append((new_point, direction, new_price))
 		return neighbours
 
-	to_check = [(0, input.start, [], RIGHT)]
+	to_check = [(0, input.start, set(), RIGHT)]
 	min_price = get_min_price(input)
 	point = input.start
 	min_points = set()
 	while to_check:
 
 		price, point, path, last_direction = heappop(to_check)
-		path.append(point)
+		path.add(point)
 		directions = get_neighbours(point, path, last_direction, price)
 		while len(directions) == 1:
 			new_point, direction, new_price = directions[0]
 			if new_point == input.end:
 				break
-			path.append(new_point)
+			path.add(new_point)
 			directions = get_neighbours(new_point, path, direction, new_price)
 		
 		for new_point, direction, new_price in directions:
 			
 			if new_point == input.end:
 				if new_price == min_price:
-					path.append(new_point)
-					min_points |= set(path)
+					path.add(new_point)
+					min_points |= path
 				continue
 				
 			heappush(to_check, (new_price, new_point, path.copy(), direction))
@@ -150,15 +202,25 @@ def get_min_path(input):
 
 def part2(input):
 
+	remove_dead_ends(input)
+	""" 	for row in input.grid:
+		for cell in row:
+			if cell == "x":
+				print("\033[33mx", end="\033[0m")
+			else:
+				print(cell, end="")
+		print()
+	print() """
+
 	paths = get_min_path(input)
 
-	for i, row in enumerate(input.grid):
+	""" for i, row in enumerate(input.grid):
 		for j, cell in enumerate(row):
 			if (i, j) in paths:
 				print("O", end="")
 			else:
 				print(cell, end="")
-		print()
+		print() """
 
 	input.result = len(paths)
 	input.print_solution()
