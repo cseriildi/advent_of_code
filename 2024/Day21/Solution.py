@@ -1,7 +1,7 @@
 from os import path
 import sys
-import numpy as np
-from functools import lru_cache
+from functools import cache
+import re
 
 ###################
 ## INPUT PARSING ##
@@ -30,10 +30,10 @@ class Data:
 ## PART 1 SOLUTION ##
 #####################
 
-# Define constants for directions
 UP, DOWN, LEFT, RIGHT = "^", "v", "<", ">"
 
-# Define the numerical pad and directional pads
+DIRECTIONS = {DOWN: (1, 0), UP: (-1, 0), LEFT: (0, -1), RIGHT: (0, 1)}
+
 NUMERICAL_PAD = {
 	"7": (0, 0), "8": (0, 1), "9": (0, 2),
 	"4": (1, 0), "5": (1, 1), "6": (1, 2),
@@ -46,134 +46,89 @@ DIRECTIONAL_PAD = {
 	LEFT: (1, 0), DOWN: (1, 1), RIGHT: (1, 2)
 }
 
-PAD1 = {v: k for k, v in NUMERICAL_PAD.items()}
-PAD2 = {v: k for k, v in DIRECTIONAL_PAD.items()}
+PAD_N = {v: k for k, v in NUMERICAL_PAD.items()}
+PAD_D = {v: k for k, v in DIRECTIONAL_PAD.items()}
 
-@lru_cache
+@cache
 def move(point, dir):
 	return (point[0] + dir[0], point[1] + dir[1])
 
-@lru_cache
+@cache
+def get_delta(point1, point2):
+	return point2[0] - point1[0], point2[1] - point1[1]
+
+@cache
 def get_horizontal(point, d_col, numeric):
-	str = ""
-	right = d_col > 0
+	
+	direction = RIGHT if d_col > 0 else LEFT
 	p = point
 	for _ in range(abs(d_col)):
-		p = move(p, (0, 1 if right else -1))
-		if numeric and PAD1[p] == "X":
+		p = move(p, DIRECTIONS[direction])
+		if (numeric and PAD_N[p] == "X") or (not numeric and PAD_D[p] == "X"):
 			return "X"
-		if not numeric and PAD2[p] == "X":
-			return "X"
-		if right:
-			str += RIGHT
-		else:
-			str += LEFT
-	return str
+	return direction * abs(d_col)
 
-@lru_cache
+@cache
 def get_vertical(point, d_row, numeric):
-	str = ""
-	down = d_row > 0
+	direction = DOWN if d_row > 0 else UP
 	p = point
 	for _ in range(abs(d_row)):
-		p = move(p, (1 if down else -1, 0))
-		if numeric and PAD1[p] == "X":
+		p = move(p, DIRECTIONS[direction])
+		if numeric and PAD_N[p] == "X" or not numeric and PAD_D[p] == "X":
 			return "X"
-		if not numeric and PAD2[p] == "X":
-			return "X"
-		if down:
-			str += DOWN
-		else:
-			str += UP
-	return str
+	return direction * abs(d_row)
 
-
-@lru_cache
+@cache
 def calculate_movements(curr, next, numeric):
-		
+
+	point1 = NUMERICAL_PAD[curr] if numeric else DIRECTIONAL_PAD[curr]
+	point2 = NUMERICAL_PAD[next] if numeric else DIRECTIONAL_PAD[next]
+
+	d_row, d_col = get_delta(point1, point2)
+	option1 = get_horizontal(point1, d_col, numeric) + get_vertical(move(point1, (0, d_col)), d_row, numeric) + "A"
+	option2 = get_vertical(point1, d_row, numeric) + get_horizontal(move(point1, (d_row, 0)), d_col, numeric) + "A"
+
 	movements = []
-	if numeric:
-		point1 = NUMERICAL_PAD[curr]
-		point2 = NUMERICAL_PAD[next]
-	else:
-		point1 = DIRECTIONAL_PAD[curr]
-		point2 = DIRECTIONAL_PAD[next]
-
-	d_row = point2[0] - point1[0]
-	d_col = point2[1] - point1[1]
-
-	hor1 = get_horizontal(point1, d_col, numeric)
-	hor2 = get_horizontal(move(point1, (d_row, 0)), d_col, numeric)
-	ver1 = get_vertical(point1, d_row, numeric)
-	ver2 = get_vertical(move(point1, (0, d_col)), d_row, numeric)
-
-	if hor1 != "X" and ver2 != "X":
-			movements.append(hor1 + ver2 + "A")
-	if hor2 != "X" and ver1 != "X" and hor1 + ver2 != ver1 + hor2:
-			movements.append(ver1 + hor2 + "A")
+	if "X" not in option1:
+			movements.append(option1)
+	if option1 != option2 and "X" not in option2:
+			movements.append(option2)
 	return movements
 
-import heapq
-
-@lru_cache
+@cache
 def path_finder(code, prev, numeric):
 	paths = set()
 	length = len(code)
-	to_check = [(0, 0, prev, [])]
-	heapq.heapify(to_check)
+	to_check = [[0, prev, ""]]
 	while to_check:
-		priority, i, curr, path = heapq.heappop(to_check)
+		i, curr, path = to_check.pop()
 		if i == length:
-			if path:
-				paths.add("".join(path))
+			paths.add(path)
 			continue
 		for step in calculate_movements(curr, code[i], numeric):
-			heapq.heappush(to_check, (priority + len(step), i + 1, code[i], path + [step]))
-		
+			to_check.append([i + 1, code[i], path + step])
 	return paths
 
-""" def decoder(code):
-	def move_backwards(point, dir):
-		return (point[0] - dir[0], point[1] - dir[1])
+@cache
+def find_shortest_path(codes, number_of_robots, numeric):
+	prev = "A"
+	res = 0
+	for code in codes:
+		for c in code:
+			new_code = path_finder(c, prev, numeric)
+			if number_of_robots == 0:
+				res += min([len(code) for code in new_code])
+			else:
+				res += min(find_shortest_path(code, number_of_robots - 1, numeric=False) for code in new_code)
+			prev = c
+	return res
 
-	previous_code = ""
-	position = DIRECTIONAL_PAD["A"]
-	for step in code.split("A")[:-1]:
-		for c in step:
-			if c == UP:
-				position = move_backwards(position, (1, 0))
-			elif c == DOWN:
-				position = move_backwards(position, (-1, 0))
-			elif c == LEFT:
-				position = move_backwards(position, (0, 1))
-			elif c == RIGHT:
-				position = move_backwards(position, (0, -1))
-		previous_code += PAD2[position]
-
-	return previous_code """
-
-def find_shortest_path(code, prev, number_of_robots=2):
-
-	current_paths = path_finder(code, prev, True)
-	for i in range(number_of_robots):
-		next_paths = set()
-		for path in current_paths:
-			next_paths.update(path_finder(path, "A", False))
-		current_paths = next_paths
-	return min([len(path) for path in current_paths])
-
-import re
 def get_number(code):
 	return int(re.findall(r'\d+', code)[0])
 
 def part1(input):
 	for code in input.codes:
-		shortest = 0
-		prev = "A"
-		for c in code:
-			shortest += find_shortest_path(c, prev, 2)
-			prev = c
-		input.result += shortest * get_number(code)
+		input.result += find_shortest_path(code, number_of_robots=2, numeric=True) * get_number(code)
 	input.print_solution()
 
 #####################
@@ -182,12 +137,7 @@ def part1(input):
 
 def part2(input):
 	for code in input.codes:
-		shortest = 0
-		prev = "A"
-		for c in code:
-			shortest += find_shortest_path(c, prev, 25)
-			prev = c
-		input.result += shortest * get_number(code)
+		input.result += find_shortest_path(code,number_of_robots=25, numeric=True) * get_number(code)
 	input.print_solution()
 
 ##########
@@ -213,5 +163,5 @@ if __name__ == "__main__":
 
 	if example: part1(example)
 	part1(input)
-	#if example: part2(example)
+	if example: part2(example)
 	part2(input)
