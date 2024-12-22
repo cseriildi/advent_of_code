@@ -14,7 +14,6 @@ class Data:
 		self.result = 0
 		self.type = puzzle_type
 		self.parse_data()
-		self.rows, self.cols = self.grid.shape
 
 	def parse_data(self):
 		with open(self.filename, 'r') as infile:
@@ -29,10 +28,7 @@ class Data:
 		self.part += 1
 		self.result = 0
 
-UP = (-1, 0)
-DOWN = (1, 0)
-LEFT = (0, -1)
-RIGHT = (0, 1)
+UP, DOWN, LEFT, RIGHT = (-1, 0), (1, 0), (0, -1), (0, 1)
 
 NEXT = {
 	UP: {UP, LEFT, RIGHT},
@@ -46,12 +42,12 @@ NEXT = {
 ## PART 1 SOLUTION ##
 #####################
 
-def get_path(input):
+def path_finder(input):
 
 	def move(point, dir):
 		return (point[0] + dir[0], point[1] + dir[1])
 
-	def find_next_step(input, point, direction):
+	def find_next_step(point, direction):
 		for dir in NEXT[direction]:
 			new_point = move(point, dir)
 			if input.grid[new_point[0]][new_point[1]] == "#":
@@ -62,45 +58,35 @@ def get_path(input):
 	path = []
 	point = input.start
 	price = 0
-	direction = find_next_step(input, point, None)[1]
+	direction = find_next_step(point, None)[1]
 	while point != input.end:
-
 		path.append([point, price])
-		point, direction = find_next_step(input, point, direction)
+		point, direction = find_next_step(point, direction)
 		price += 1
-	
-	path.append([point, price])
-	return path
+
+	return path + [[input.end, price]]
 
 def get_distance(point1, point2):
 	return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
 def find_points_within_radius(path, point1, radius):
-	points = []
-	for point2, time in path:
-		if point2 != point1 and get_distance(point1, point2) <= radius:
-			points.append([point2, time])
-
-	return points
+	return {(point2, time2) for point2, time2 in path if get_distance(point1, point2) <= radius}
 
 def cheat(path, benchmark_time, allowed_cheats):
-
 	count = 0
-	for point1, time1 in path:
-		for point2, time2 in find_points_within_radius(path, point1, allowed_cheats):
-			if time2 > time1 and time1 + get_distance(point1, point2) <= time2 - benchmark_time:
+	for index, (point1, time1) in enumerate(path):
+		for point2, time2 in find_points_within_radius(path[index + 1:], point1, allowed_cheats):
+			if time2 - time1 - get_distance(point1, point2) >= benchmark_time:
 				count += 1
-
 	return count
 
 def part1(input):
-
-	path = get_path(input)
+	path = path_finder(input)
 
 	if input.type == "Example":
-		input.result = cheat(path, 1, 2)
+		input.result = cheat(path, benchmark_time=1, allowed_cheats=2)
 	else:
-		input.result = cheat(path, 100, 2)
+		input.result = cheat(path, benchmark_time=100, allowed_cheats=2)
 	input.print_solution()
 
 #####################
@@ -108,13 +94,12 @@ def part1(input):
 #####################
 
 def part2(input):
-
-	path = get_path(input)
+	path = path_finder(input)
 
 	if input.type == "Example":
-		input.result = cheat(path, 50, 20)
+		input.result = cheat(path, benchmark_time=50, allowed_cheats=20)
 	else:
-		input.result = cheat(path, 100, 20)
+		input.result = cheat(path, benchmark_time=100, allowed_cheats=20)
 	input.print_solution()
 
 
