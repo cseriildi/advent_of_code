@@ -8,6 +8,6 @@ Here are my solutions for the following years:
 
 | Year				| Language	| Stars	 |
 |-------------------|:---------:|:------:|
-| [2024](./2024/)	| Python	| 44 ⭐	|
+| [2024](./2024/)	| Python	| 46 ⭐	|
 | [2023](./2023/)	| Python	| 31 ⭐	|
 | [2021](./2021/)	| Python	| 20 ⭐	|
