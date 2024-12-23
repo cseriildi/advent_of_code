@@ -35,7 +35,7 @@ def find_groups_of_three(connections):
 	groups = set()
 	for (a, b), (c, d) in combinations(connections, 2):
 		if (a == c and {b, d} in connections) or (a == d and {b, c} in connections):
-			groups.add(tuple(sorted({a, b, c, d})))
+			groups.add(frozenset((a, b, c, d)))
 	return groups
 
 def group_has_computer_with_t(group):
@@ -52,7 +52,7 @@ def part1(input):
 
 def count_occurrences(networks, group):
 	""" Count how many times the group appears in the networks """
-	return sum(set(group).issubset(network) for network in networks)
+	return sum(group.issubset(network) for network in networks)
 
 def find_networks(connections):
 	""" Find all connections between computers """
@@ -71,7 +71,7 @@ def find_biggest_network(networks):
 	while max_len > 1:
 		for network in networks:
 			for group in combinations(network, max_len):
-				if count_occurrences(networks, group) == max_len:
+				if count_occurrences(networks, set(group)) == max_len:
 					return ','.join(sorted(group))
 		max_len -= 1
 	return ""
