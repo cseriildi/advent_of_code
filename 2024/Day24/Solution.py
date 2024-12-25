@@ -64,6 +64,7 @@ def get_value(vars, var):
 	return int(bin, 2)
 
 def part1(input):
+	
 	do_calculation(input.instructions, input.variables)
 	input.result = get_value(input.variables, "z")
 	input.print_solution()
@@ -72,27 +73,44 @@ def part1(input):
 ## PART 2 SOLUTION ##
 #####################
 
-from itertools import combinations
+def create_dot_file(inst, vars):
+	with open("graph.dot", "w") as dotfile:
+		dotfile.write("digraph G {\n")
+		for var, value in vars.items():
+			dotfile.write(f'  "{var}"[label="{var}", fontcolor="{"red" if value == 1 else "blue"}"];\n')
+		
+		for result, var1, op, var2 in inst:
+			dotfile.write(f'  "{var1}" -> "{result}"[label="{op}", color="{"red" if vars[var1] == 1 else "blue"}"];\n')
+			dotfile.write(f'  "{var2}" -> "{result}"[label="{op}", color="{"red" if vars[var2] == 1 else "blue"}"];\n')
+		dotfile.write("}\n")
+
+def find_wrong_ones(vars):
+	x_s = get_bits(vars, "x")
+	y_s = get_bits(vars, "y")
+	z_s = get_bits(vars, "z")
+	remainder = 0
+	z = ""
+	actual_z = ''.join(str(vars[bit]) for bit in z_s)
+	for x, y in zip(x_s[::-1], y_s[::-1]):
+		z = str((vars[x] + vars[y] + remainder) % 2) + z
+		remainder =  (vars[x] + vars[y] + remainder) > 1
+	if remainder:
+		z = "1" + z
+	for z1, z2 in zip(z, actual_z):
+		if z1 != z2:
+			print("\033[91m", end="")
+		print(z1, end="\033[0m")
+	print()
 
 def part2(input):
 	input.parse_data()
 
 	inst = [row[:] for row in input.instructions]
-	vars = {key: value for key, value in input.variables.items()}
+	do_calculation(input.instructions, input.variables)
+	create_dot_file(inst, input.variables)
 
-	for pairs in combinations(list(combinations(range(len(inst)), 2)), 2):
-		if len({x for pair in pairs for x in pair}) == 4:
-			(a, b), (c, d) = pairs#, (e, f), (g, h) = pairs
-			input.result = ','.join(sorted([inst[a][0], inst[b][0], inst[c][0], inst[d][0]]))#, inst[e][0], inst[f][0], inst[g][0], inst[h][0]]))
-			inst[a][0], inst[b][0] = inst[b][0], inst[a][0]
-			inst[c][0], inst[d][0] = inst[d][0], inst[c][0]
-			#inst[e][0], inst[f][0] = inst[f][0], inst[e][0]
-			#inst[g][0], inst[h][0] = inst[h][0], inst[g][0]
-			do_calculation(inst, vars)
-			if get_value(vars, "z") == get_value(vars, "x") & get_value(vars, "y"):
-				break
-			inst = [row[:] for row in input.instructions]
-			vars = {key: value for key, value in input.variables.items()}
+	find_wrong_ones(input.variables)
+	input.result = "I solved this manually, using dot visualization, will code it later"
 	input.print_solution()
 
 ##########
