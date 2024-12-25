@@ -53,8 +53,6 @@ def part1(input):
 ## PART 2 SOLUTION ##
 #####################
 
-from itertools import combinations
-
 def part2(input):
 	input.result = "You only need to solve Part 1 for this day, sadly"
 	input.print_solution()
