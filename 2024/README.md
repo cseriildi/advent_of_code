@@ -25,5 +25,5 @@
 |[21](./Day21/Solution.py)	|	⭐	|	⭐	|
 |[22](./Day22/Solution.py)	|	⭐	|	⭐	|
 |[23](./Day23/Solution.py)	|	⭐	|	⭐	|
-|[24](./Day24/Solution.py)	|	⭐	|		|
-|25							|		|		|
+|[24](./Day24/Solution.py)	|	⭐	|	⭐	|
+|[25](./Day25/Solution.py)	|	⭐	|	⭐	|
