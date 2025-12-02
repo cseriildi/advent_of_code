@@ -53,7 +53,11 @@ def part1(data: Data) -> None:
 
 
 def is_repeated_multiple(id: int) -> bool:
-    """Check if number can be formed by repeating a pattern."""
+    """
+    My original solution:
+    Check if number can be formed by repeating a pattern.
+    """
+
     id_str = str(id)
     length = len(id_str)
     return any(
@@ -62,12 +66,15 @@ def is_repeated_multiple(id: int) -> bool:
     )
 
 
+def has_pattern(id: int) -> bool:
+    """s in (s+s)[1:-1] idiom to check for repeated patterns."""
+    id_str = str(id)
+    return id_str in (id_str * 2)[1:-1]
+
+
 def part2(data: Data) -> None:
     data.result = sum(
-        id
-        for id_range in data.ranges
-        for id in id_range
-        if is_repeated_multiple(id)
+        id for id_range in data.ranges for id in id_range if has_pattern(id)
     )
     data.print_solution()
 
