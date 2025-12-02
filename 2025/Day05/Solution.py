@@ -7,6 +7,7 @@ class Data:
         self.filename = filename
         self.part = 1
         self.result = 0
+        self.expected = None
         self.type = puzzle_type
         self.parse_data()
 
@@ -14,9 +15,22 @@ class Data:
         with open(self.filename) as infile:
             self.input = infile.read().splitlines()
 
+    def set_expected(self, expected: int) -> None:
+        self.expected = expected
+
+    def unit_test(self) -> str:
+        if self.expected is None:
+            return ""
+        if self.result == self.expected:
+            return "✅"
+        return f"❌ (expected {self.expected})"
+
     def print_solution(self) -> None:
         color = GRAY if self.part == 1 else YELLOW
-        print(f"{color}Part {self.part} {self.type}: {self.result}{RESET}")
+        print(
+            f"{color}Part {self.part} {self.type}: {self.result}{RESET}",
+            self.unit_test(),
+        )
         self.part += 1
         self.result = 0
 
@@ -74,8 +88,10 @@ if __name__ == "__main__":
     example = load_data("example")
 
     if example:
+        example.set_expected(None)
         part1(example)
     part1(puzzle)
     if example:
+        example.set_expected(None)
         part2(example)
     part2(puzzle)
