@@ -12,7 +12,11 @@ class Data:
 
     def parse_data(self) -> None:
         with open(self.filename) as infile:
-            self.input = infile.read().splitlines()
+            self.ranges = [
+                range(int(start), int(end) + 1)
+                for pair in infile.read().split(",")
+                for start, end in [pair.split("-")]
+            ]
 
     def print_solution(self) -> None:
         color = GRAY if self.part == 1 else YELLOW
@@ -26,10 +30,20 @@ class Data:
 #####################
 
 
+def is_repeated_twice(id: int) -> bool:
+    """Check if number's first half equals second half."""
+    id_str = str(id)
+    mid = len(id_str) // 2
+    return id_str[:mid] == id_str[mid:]
+
+
 def part1(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    data.result = sum(
+        id
+        for id_range in data.ranges
+        for id in id_range
+        if is_repeated_twice(id)
+    )
     data.print_solution()
 
 
@@ -38,10 +52,23 @@ def part1(data: Data) -> None:
 #####################
 
 
+def is_repeated_multiple(id: int) -> bool:
+    """Check if number can be formed by repeating a pattern."""
+    id_str = str(id)
+    length = len(id_str)
+    return any(
+        id_str == id_str[:i] * (length // i)
+        for i in range(length // 2 + 1, 1, -1)
+    )
+
+
 def part2(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    data.result = sum(
+        id
+        for id_range in data.ranges
+        for id in id_range
+        if is_repeated_multiple(id)
+    )
     data.print_solution()
 
 
