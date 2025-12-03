@@ -3,8 +3,8 @@
 |            Day            | Part 1 | Part 2 |
 | :-----------------------: | :----: | :----: |
 | [1](./Day01/Solution.py)  |   ⭐   |   ⭐   |
-| [2](./Day02/Solution.py)  |        |        |
-| [3](./Day03/Solution.py)  |        |        |
+| [2](./Day02/Solution.py)  |   ⭐   |   ⭐   |
+| [3](./Day03/Solution.py)  |   ⭐   |   ⭐   |
 | [4](./Day04/Solution.py)  |        |        |
 | [5](./Day05/Solution.py)  |        |        |
 | [6](./Day06/Solution.py)  |        |        |
