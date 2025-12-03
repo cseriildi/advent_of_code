@@ -13,7 +13,7 @@ class Data:
 
     def parse_data(self) -> None:
         with open(self.filename) as infile:
-            self.input = infile.read().splitlines()
+            self.banks = infile.read().splitlines()
 
     def set_expected(self, expected: int) -> None:
         self.expected = expected
@@ -40,10 +40,22 @@ class Data:
 #####################
 
 
+def find_biggest_jolt(bank: str, num: int = 2) -> int:
+    jolt = ""
+    start = 0
+    end = len(bank) - num
+
+    for _ in range(num):
+        end += 1
+        max_battery = max(bank[start:end])
+        jolt += max_battery
+        start = bank.index(max_battery, start) + 1
+
+    return int(jolt)
+
+
 def part1(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    data.result = sum(find_biggest_jolt(bank) for bank in data.banks)
     data.print_solution()
 
 
@@ -53,9 +65,7 @@ def part1(data: Data) -> None:
 
 
 def part2(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    data.result = sum(find_biggest_jolt(bank, 12) for bank in data.banks)
     data.print_solution()
 
 
@@ -69,7 +79,7 @@ RED = "\033[1;91m"
 RESET = "\033[0m"
 
 
-def load_data(puzzle_type: str) -> Data | None:
+def load_data(puzzle_type: str):
     filename = Path(__file__).parent / f"{puzzle_type}.txt"
     try:
         return Data(filename, puzzle_type)
@@ -88,10 +98,10 @@ if __name__ == "__main__":
     example = load_data("example")
 
     if example:
-        example.set_expected(None)
+        example.set_expected(357)
         part1(example)
     part1(puzzle)
     if example:
-        example.set_expected(None)
+        example.set_expected(3121910778619)
         part2(example)
     part2(puzzle)
