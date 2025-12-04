@@ -47,6 +47,8 @@ class Data:
 
 
 def part1(data: Data) -> None:
+    """Counts how many times the dial ends on 0 after the rotations."""
+
     dial = DIALSTART
     data.result = sum(
         1 for d, move in data.moves if (dial := (dial + d * move) % 100) == 0
@@ -60,6 +62,8 @@ def part1(data: Data) -> None:
 
 
 def part2(data: Data) -> None:
+    """Counts how many times the dial passes 0 during the rotations."""
+
     dial = DIALSTART
     for d, move in data.moves:
         data.result += sum(

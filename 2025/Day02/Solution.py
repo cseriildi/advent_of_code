@@ -46,12 +46,15 @@ class Data:
 
 def is_repeated_twice(id: int) -> bool:
     """Check if number's first half equals second half."""
+
     id_str = str(id)
     mid = len(id_str) // 2
     return id_str[:mid] == id_str[mid:]
 
 
 def part1(data: Data) -> None:
+    """Sums IDs that are formed by repeating a pattern 2 times."""
+
     data.result = sum(
         id
         for id_range in data.ranges
@@ -82,11 +85,14 @@ def is_repeated_multiple(id: int) -> bool:
 
 def has_pattern(id: int) -> bool:
     """s in (s+s)[1:-1] idiom to check for repeated patterns."""
+
     id_str = str(id)
     return id_str in (id_str * 2)[1:-1]
 
 
 def part2(data: Data) -> None:
+    """Sums IDs that are formed by repeating pattern any number of times."""
+
     data.result = sum(
         id for id_range in data.ranges for id in id_range if has_pattern(id)
     )

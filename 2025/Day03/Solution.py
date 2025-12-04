@@ -41,6 +41,10 @@ class Data:
 
 
 def find_biggest_jolt(bank: str, num: int = 2) -> int:
+    """Find the biggest possible jolt.
+    A jolt is formed by concatenating 'num' batteries from the bank.
+    The order of batteries can't be changed, but does have to be contiguous."""
+
     jolt = ""
     start = 0
     end = len(bank) - num
@@ -55,6 +59,8 @@ def find_biggest_jolt(bank: str, num: int = 2) -> int:
 
 
 def part1(data: Data) -> None:
+    """Sums the biggest jolts from each bank using 2 batteries."""
+
     data.result = sum(find_biggest_jolt(bank) for bank in data.banks)
     data.print_solution()
 
@@ -65,6 +71,8 @@ def part1(data: Data) -> None:
 
 
 def part2(data: Data) -> None:
+    """Sums the biggest jolts from each bank using 12 batteries."""
+
     data.result = sum(find_biggest_jolt(bank, 12) for bank in data.banks)
     data.print_solution()
 
