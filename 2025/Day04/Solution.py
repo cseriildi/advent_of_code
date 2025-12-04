@@ -2,6 +2,51 @@ import sys
 from pathlib import Path
 
 
+class Grid:
+    def __init__(self, input: str) -> None:
+        self.cells = [list(line) for line in input.splitlines()]
+        self.rows = len(self.cells)
+        self.cols = len(self.cells[0]) if self.rows > 0 else 0
+
+    NEIGHBOURS = [
+        (0, -1),
+        (0, 1),
+        (-1, 0),
+        (1, 0),
+        (1, -1),
+        (1, 1),
+        (-1, -1),
+        (-1, 1),
+    ]
+
+    def is_in_bounds(self, x: int, y: int) -> bool:
+        return 0 <= x < self.cols and 0 <= y < self.rows
+
+    def is_paper(self, x: int, y: int) -> bool:
+        return self.is_in_bounds(x, y) and self.cells[y][x] == "@"
+
+    def count_neighbors(self, x: int, y: int) -> int:
+        return sum(self.is_paper(x + dx, y + dy) for dx, dy in self.NEIGHBOURS)
+
+    def is_accessible_paper(self, x: int, y: int) -> bool:
+        return self.is_paper(x, y) and self.count_neighbors(x, y) < 4
+
+    def remove_paper(self, x: int, y: int) -> None:
+        self.cells[y][x] = "."
+
+    def remove_if_accessible(self, x: int, y: int) -> bool:
+        if self.is_accessible_paper(x, y):
+            self.remove_paper(x, y)
+            return True
+        return False
+
+    def apply(self, fn):
+        """Apply fn(x,y) for each coordinate."""
+        for y in range(self.rows):
+            for x in range(self.cols):
+                yield fn(x, y)
+
+
 class Data:
     def __init__(self, filename: Path, puzzle_type: str) -> None:
         self.filename = filename
@@ -13,7 +58,7 @@ class Data:
 
     def parse_data(self) -> None:
         with open(self.filename) as infile:
-            self.input = infile.read().splitlines()
+            self.grid = Grid(infile.read())
 
     def set_expected(self, expected: int) -> None:
         self.expected = expected
@@ -41,9 +86,10 @@ class Data:
 
 
 def part1(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    """Counts papers ('@') in the grid with less than 4 neighboring paper."""
+
+    data.result = sum(data.grid.apply(data.grid.is_accessible_paper))
+
     data.print_solution()
 
 
@@ -53,9 +99,12 @@ def part1(data: Data) -> None:
 
 
 def part2(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    """Counts papers ('@') that can be removed iteratively.
+    A paper can be removed if it has less than 4 neighboring paper."""
+
+    while removed := sum(data.grid.apply(data.grid.remove_if_accessible)):
+        data.result += removed
+
     data.print_solution()
 
 
@@ -88,10 +137,10 @@ if __name__ == "__main__":
     example = load_data("example")
 
     if example:
-        example.set_expected(None)
+        example.set_expected(13)
         part1(example)
     part1(puzzle)
     if example:
-        example.set_expected(None)
+        example.set_expected(43)
         part2(example)
     part2(puzzle)
