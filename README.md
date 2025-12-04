@@ -6,9 +6,9 @@ Welcome to my **Advent of Code** repository! 🎄✨
 
 Here are my solutions for the following years:
 
-| Year            | Language |  Stars   |
-| --------------- | :------: | :------: |
-| [2025](./2025/) |  Python  | 8/24 ⭐  |
-| [2024](./2024/) |  Python  | 50/50 ⭐ |
-| [2023](./2023/) |  Python  | 31/50 ⭐ |
-| [2021](./2021/) |  Python  | 20/50 ⭐ |
+| Year                     | Language |  Stars   |
+| ------------------------ | :------: | :------: |
+| [2025](./2025/README.md) |  Python  | 8/24 ⭐  |
+| [2024](./2024/README.md) |  Python  | 50/50 ⭐ |
+| [2023](./2023/README.md) |  Python  | 31/50 ⭐ |
+| [2021](./2021/README.md) |  Python  | 20/50 ⭐ |
