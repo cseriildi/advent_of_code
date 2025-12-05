@@ -13,7 +13,13 @@ class Data:
 
     def parse_data(self) -> None:
         with open(self.filename) as infile:
-            self.input = infile.read().splitlines()
+            ranges, ingredient = infile.read().split("\n\n")
+            self.fresh = [
+                range(int(start), int(end) + 1)
+                for line in ranges.splitlines()
+                for start, end in [line.split("-")]
+            ]
+            self.available = [int(line) for line in ingredient.splitlines()]
 
     def set_expected(self, expected: int) -> None:
         self.expected = expected
@@ -41,9 +47,13 @@ class Data:
 
 
 def part1(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    """Count available fresh ingredients."""
+
+    data.result = sum(
+        any(ingredient in fresh for fresh in data.fresh)
+        for ingredient in data.available
+    )
+
     data.print_solution()
 
 
@@ -53,9 +63,19 @@ def part1(data: Data) -> None:
 
 
 def part2(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    """Counts all distinct fresh ingredients."""
+
+    sorted_ranges = sorted(data.fresh, key=lambda r: r.start)
+    start = sorted_ranges[0].start
+    end = sorted_ranges[0].stop
+
+    for ran in sorted_ranges:
+        if ran.start >= end:
+            data.result += end - start
+            start = ran.start
+        end = max(end, ran.stop)
+    data.result += end - start
+
     data.print_solution()
 
 
@@ -88,10 +108,10 @@ if __name__ == "__main__":
     example = load_data("example")
 
     if example:
-        example.set_expected(None)
+        example.set_expected(3)
         part1(example)
     part1(puzzle)
     if example:
-        example.set_expected(None)
+        example.set_expected(14)
         part2(example)
     part2(puzzle)
