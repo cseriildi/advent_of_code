@@ -13,7 +13,7 @@ class Data:
 
     def parse_data(self) -> None:
         with open(self.filename) as infile:
-            self.input = infile.read().splitlines()
+            self.input = [line.rstrip("\n") for line in infile]
 
     def set_expected(self, expected: int) -> None:
         self.expected = expected
@@ -40,10 +40,31 @@ class Data:
 #####################
 
 
+def do_operation(op: str, nums: list[int]) -> int:
+    res = nums.pop(0)
+    if op == "+":
+        res += sum(nums)
+    elif op == "-":
+        res -= sum(nums)
+    elif op == "*":
+        [res := res * n for n in nums]
+    elif op == "/":
+        [res := res // n for n in nums]
+    return res
+
+
 def part1(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    """Applies the operation in last row to each number above and sums them."""
+
+    numbers = [line.split() for line in data.input[:-1]]
+    operations = data.input[-1].split()
+    rows = len(numbers)
+    cols = len(numbers[0])
+
+    for x in range(cols):
+        nums = [int(numbers[y][x]) for y in range(rows)]
+        data.result += do_operation(operations[x], nums)
+
     data.print_solution()
 
 
@@ -53,9 +74,22 @@ def part1(data: Data) -> None:
 
 
 def part2(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    cols = max(len(line) for line in data.input)
+    numbers = [(line.ljust(cols)) for line in data.input[:-1]]
+    operations = data.input[-1]
+    rows = len(numbers)
+
+    nums = []
+    for x in range(cols - 1, -1, -1):
+        num = "".join(
+            numbers[y][x] for y in range(rows) if numbers[y][x] != " "
+        )
+        if num:
+            nums.append(int(num))
+        if operations[x] in "+-*/":
+            data.result += do_operation(operations[x], nums)
+            nums.clear()
+
     data.print_solution()
 
 
@@ -88,10 +122,10 @@ if __name__ == "__main__":
     example = load_data("example")
 
     if example:
-        example.set_expected(None)
+        example.set_expected(4277556)
         part1(example)
     part1(puzzle)
     if example:
-        example.set_expected(None)
+        example.set_expected(3263827)
         part2(example)
     part2(puzzle)
