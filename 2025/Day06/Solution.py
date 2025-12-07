@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from math import prod
 
 
 class Data:
@@ -41,16 +42,10 @@ class Data:
 
 
 def do_operation(op: str, nums: list[int]) -> int:
-    res = nums.pop(0)
     if op == "+":
-        res += sum(nums)
-    elif op == "-":
-        res -= sum(nums)
+        return sum(nums)
     elif op == "*":
-        [res := res * n for n in nums]
-    elif op == "/":
-        [res := res // n for n in nums]
-    return res
+        return prod(nums)
 
 
 def part1(data: Data) -> None:
@@ -86,7 +81,7 @@ def part2(data: Data) -> None:
         )
         if num:
             nums.append(int(num))
-        if operations[x] in "+-*/":
+        if operations[x] in "+*":
             data.result += do_operation(operations[x], nums)
             nums.clear()
 
