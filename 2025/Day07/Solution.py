@@ -1,5 +1,28 @@
 import sys
+from functools import cache
 from pathlib import Path
+
+
+class Grid:
+    def __init__(self, input: str) -> None:
+        self.cells = [list(line) for line in input.splitlines()]
+        self.rows = len(self.cells)
+        self.cols = len(self.cells[0]) if self.rows > 0 else 0
+        self.start = next(
+            (
+                (x, y)
+                for y in range(self.rows)
+                for x in range(self.cols)
+                if self.cells[y][x] == "S"
+            ),
+            None,
+        )
+
+    def is_in_bounds(self, x: int, y: int) -> bool:
+        return 0 <= x < self.cols and 0 <= y < self.rows
+
+    def get_cell(self, x: int, y: int) -> str:
+        return self.cells[y][x] if self.is_in_bounds(x, y) else None
 
 
 class Data:
@@ -13,7 +36,7 @@ class Data:
 
     def parse_data(self) -> None:
         with open(self.filename) as infile:
-            self.input = infile.read().splitlines()
+            self.grid = Grid(infile.read())
 
     def set_expected(self, expected: int) -> None:
         self.expected = expected
@@ -41,21 +64,42 @@ class Data:
 
 
 def part1(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    """Counts how many times the beam will split"""
+
+    @cache
+    def dfs(x: int, y: int) -> frozenset[tuple[int, int]]:
+        match data.grid.get_cell(x, y):
+            case ".":
+                return dfs(x, y + 1)
+            case "^":
+                return (
+                    dfs(x - 1, y + 1) | dfs(x + 1, y + 1) | frozenset({(x, y)})
+                )
+            case _:
+                return frozenset()
+
+    data.result = len(dfs(data.grid.start[0], data.grid.start[1] + 1))
     data.print_solution()
 
-
-#####################
-## PART 2 SOLUTION ##
-#####################
+    #####################
+    ## PART 2 SOLUTION ##
+    #####################
 
 
 def part2(data: Data) -> None:
-    for line in data.input:
-        pass
-    data.result = 0
+    """Counts how many different paths can a beam take"""
+
+    @cache
+    def dfs(x: int, y: int) -> int:
+        match data.grid.get_cell(x, y):
+            case ".":
+                return dfs(x, y + 1)
+            case "^":
+                return dfs(x - 1, y + 1) + dfs(x + 1, y + 1)
+            case _:
+                return 1
+
+    data.result = dfs(data.grid.start[0], data.grid.start[1] + 1)
     data.print_solution()
 
 
@@ -88,10 +132,10 @@ if __name__ == "__main__":
     example = load_data("example")
 
     if example:
-        example.set_expected(None)
+        example.set_expected(21)
         part1(example)
     part1(puzzle)
     if example:
-        example.set_expected(None)
+        example.set_expected(40)
         part2(example)
     part2(puzzle)
